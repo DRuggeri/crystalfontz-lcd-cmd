@@ -23,7 +23,7 @@ void usage() {
   printf("  -line1 \"string\": Set the first line of the LCD to this value. String must be 16 characters or less.\n");
   printf("  -line2 \"string\": Set the second line of the LCD to this value. String must be 16 characters or less.\n");
   printf("  -lines \"line1\" \"line2\": Set line1 and line2 of the LCD to these values. Strings must be 16 characters or less.\n");
-  printf("  -gpioconfigure INDEX ENALBE TYPE: Configure GPIO index to enable or disable (0|1) and the configuration type. Both are required. Index and TYPEs are described below.\n");
+  printf("  -gpioconfigure INDEX enable|disable TYPE: Configure GPIO index to enable or disable (0|1) and the configuration type. Both are required. Index and TYPEs are described below.\n");
   printf("  -gpioset INDEX VALUE: Set GPIO index to value. Index values are described below. Value must be from 0 to 100. Note, GPIO configuration may need to be set first!\n");
   printf("  -gpioget INDEX: Get the GPIO configuration at index. Index values are described below.\n");
   printf("  -setboot: set LCD screen nv memory to the contents and configuration of the screen. Will be done after all other actions are processed.\n");
@@ -106,14 +106,15 @@ int main(int argc, char* argv[])
     }
     else if (!strcmp(argv[i], "-gpioconfigure")) {
       int gpio_idx = get_gpio_idx(get_param(++i, argc, argv));
-      int gpio_enable = atoi(get_param(++i, argc, argv));
+      char *gpio_enable = get_param(++i, argc, argv);
       int gpio_val = atoi(get_param(++i, argc, argv));
-      char bin[5] = { gpio_enable == 0 ? '0' : '1', 0, 0, 0, '\0' };
+      char bin[5] = { !strcmp(gpio_enable, "enable") ? '0' : '1', 0, 0, 0, '\0' };
 
-      if (gpio_enable < 0 || gpio_enable > 1) {
-        printf("ERROR: GPIO enable must be either 0 or 1\n");
+      if (strcmp(gpio_enable, "enable") && strcmp(gpio_enable, "enable")) {
+        printf("ERROR: second parameter to -gpioconfigure must be enable or disable\n");
         usage();
       }
+
       if (gpio_val < 0 || gpio_val > 7 || gpio_val == 6) {
         printf("ERROR: GPIO config type must be 0, 1, 2, 3, 4, 5, or 7\n");
         usage();
